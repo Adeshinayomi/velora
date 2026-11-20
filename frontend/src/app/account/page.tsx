@@ -501,37 +501,25 @@ export default function AccountPage() {
     }
   }
 
-  async function handleOpenOrder(order: AccountOrder) {
-    setSelectedOrder(order);
-    setOrderDetailLoading(true);
 
-    try {
-      const result = await getOrder(order._id);
+async function handleOpenOrder(order: AccountOrder) {
+  setSelectedOrder(order);
+  setOrderDetailLoading(true);
 
-      const possibleResult = result as unknown as
-        | AccountOrder
-        | { order?: AccountOrder; data?: { order?: AccountOrder } };
+  try {
+    const result = await getOrder(order._id);
 
-      const detailedOrder =
-        "order" in possibleResult
-          ? possibleResult.order
-          : "data" in possibleResult
-            ? possibleResult.data?.order
-            : possibleResult;
-
-      if (detailedOrder) {
-        setSelectedOrder(detailedOrder);
-      }
-    } catch (detailError) {
-      showError(
-        detailError instanceof Error
-          ? detailError.message
-          : "Could not load order details."
-      );
-    } finally {
-      setOrderDetailLoading(false);
-    }
+    setSelectedOrder(result.order);
+  } catch (detailError) {
+    showError(
+      detailError instanceof Error
+        ? detailError.message
+        : "Could not load order details."
+    );
+  } finally {
+    setOrderDetailLoading(false);
   }
+}
 
   async function handleLogout() {
     try {
