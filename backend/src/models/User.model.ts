@@ -1,4 +1,17 @@
-import mongoose, { Document, Schema } from "mongoose";
+
+import mongoose, { Document, Schema, Types } from "mongoose";
+
+export interface IAddress {
+  _id?: Types.ObjectId;
+  fullName: string;
+  phone: string;
+  street: string;
+  city: string;
+  state: string;
+  country: string;
+  postalCode?: string;
+  isDefault: boolean;
+}
 
 export interface IUser extends Document {
   firstName: string;
@@ -6,21 +19,12 @@ export interface IUser extends Document {
   email: string;
   password: string;
   role: "customer" | "admin";
-  addresses: {
-    fullName: string;
-    phone: string;
-    street: string;
-    city: string;
-    state: string;
-    country: string;
-    postalCode?: string;
-    isDefault: boolean;
-  }[];
+  addresses: IAddress[];
   createdAt: Date;
   updatedAt: Date;
 }
 
-const addressSchema = new Schema(
+const addressSchema = new Schema<IAddress>(
   {
     fullName: { type: String, required: true, trim: true },
     phone: { type: String, required: true, trim: true },
@@ -34,19 +38,10 @@ const addressSchema = new Schema(
   { timestamps: false }
 );
 
-
 const userSchema = new Schema<IUser>(
   {
-    firstName: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    lastName: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+    firstName: { type: String, required: true, trim: true },
+    lastName: { type: String, required: true, trim: true },
     email: {
       type: String,
       required: true,
