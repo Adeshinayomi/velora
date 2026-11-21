@@ -1,4 +1,3 @@
-
 import cookieParser from "cookie-parser";
 import express, { Request } from "express";
 import cors from "cors";
@@ -16,22 +15,23 @@ import orderRoutes from "./routes/order.routes";
 
 const app = express();
 
-// Security headers
-app.use(helmet());
-
-// CORS configuration
+// Allowed frontend origins
 const allowedOrigins = [
   "http://localhost:3000",
   "https://velora-pi-topaz.vercel.app",
 ];
 
+// Security headers
+app.use(helmet());
+
+// CORS configuration
 app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        callback(new Error(`CORS blocked for origin: ${origin}`));
+        callback(null, false);
       }
     },
     credentials: true,
@@ -44,11 +44,7 @@ app.use(
   })
 );
 
-app.use(express.json());
-
-// Your routes should come AFTER the CORS middleware
-
-// Preserve the raw JSON body for Paystack webhook signature verification.
+// Parse JSON and preserve raw body for Paystack webhook verification
 app.use(
   express.json({
     verify: (req, _res, buffer) => {
@@ -74,17 +70,15 @@ app.get("/", (_req, res) => {
 });
 
 // Protect state-changing browser requests.
-// Paystack's webhook is server-to-server and uses its own HMAC verification.
+// Paystack webhook uses its own HMAC signature verification.
 app.use((req, res, next) => {
   if (
-    req.method === "POST" &&
     req.path === "/api/orders/paystack/webhook"
   ) {
-    next();
-    return;
+    return next();
   }
 
-  originProtection(req, res, next);
+  return originProtection(req, res, next);
 });
 
 // API routes

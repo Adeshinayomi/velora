@@ -1,39 +1,39 @@
-
 import { Request, Response, NextFunction } from "express";
+
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://velora-pi-topaz.vercel.app",
+];
 
 const originProtection = (
   req: Request,
   res: Response,
   next: NextFunction
-): void => {
-  const safeMethods = ["GET", "HEAD", "OPTIONS"];
+) => {
+  // Only protect state-changing requests
+  const protectedMethods = ["POST", "PUT", "PATCH", "DELETE"];
 
-  // Safe methods do not change server state.
-  if (safeMethods.includes(req.method)) {
-    next();
-    return;
+  if (!protectedMethods.includes(req.method)) {
+    return next();
   }
 
+  // Allow requests without an Origin header.
+  // This supports server-to-server requests and non-browser clients.
   const origin = req.get("origin");
-  const allowedOrigin = process.env.FRONTEND_URL;
 
-  // Browser requests that modify data must have the expected origin.
-  if (origin) {
-    if (!allowedOrigin || origin !== allowedOrigin) {
-      res.status(403).json({
-        success: false,
-        message: "Request origin not allowed",
-      });
-      return;
-    }
-
-    next();
-    return;
+  if (!origin) {
+    return next();
   }
 
-  // Allow server-to-server requests and non-browser clients.
-  // These must still pass their own authentication/signature checks.
-  next();
+  // Validate the request origin
+  if (!allowedOrigins.includes(origin)) {
+    return res.status(403).json({
+      success: false,
+      message: "Request origin not allowed",
+    });
+  }
+
+  return next();
 };
 
 export default originProtection;
