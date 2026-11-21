@@ -20,7 +20,23 @@ const app = express();
 app.use(helmet());
 
 // CORS configuration
-app.use(cors());
+
+
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "https://velora-pi-topaz.vercel.app/",
+    ],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "x-checkout-token",
+    ],
+  })
+);
 
 // Preserve the raw JSON body for Paystack webhook signature verification.
 app.use(
