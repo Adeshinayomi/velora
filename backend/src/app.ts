@@ -20,14 +20,20 @@ const app = express();
 app.use(helmet());
 
 // CORS configuration
-
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://velora-pi-topaz.vercel.app",
+];
 
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "https://velora-pi-topaz.vercel.app/",
-    ],
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS blocked for origin: ${origin}`));
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: [
@@ -37,6 +43,10 @@ app.use(
     ],
   })
 );
+
+app.use(express.json());
+
+// Your routes should come AFTER the CORS middleware
 
 // Preserve the raw JSON body for Paystack webhook signature verification.
 app.use(
