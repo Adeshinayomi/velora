@@ -17,11 +17,13 @@ const app = express();
 
 app.set("trust proxy", 1);
 
-// Allowed frontend origins
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://velora-pi-topaz.vercel.app",
-];
+// Set FRONTEND_URLS to a comma-separated list of deployed browser origins.
+// Local development keeps localhost available without requiring an env file.
+const allowedOrigins = (process.env.FRONTEND_URLS ?? process.env.FRONTEND_URL ??
+  (process.env.NODE_ENV === "production" ? "" : "http://localhost:3000"))
+  .split(",")
+  .map((origin) => origin.trim().replace(/\/$/, ""))
+  .filter(Boolean);
 
 // Security headers
 app.use(helmet());

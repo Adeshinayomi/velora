@@ -3,9 +3,10 @@ import "dotenv/config";
 import mongoose from "mongoose";
 import Product from "../models/Product.model";
 import Category from "../models/Category.model";
-import dns from "dns";
+import configureDns from "../config/dns";
 
-dns.setServers(["8.8.8.8", "1.1.1.1"]);
+configureDns();
+
 interface DummyProduct {
   id: number;
   title: string;

@@ -1,9 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://velora-pi-topaz.vercel.app",
-];
+const allowedOrigins = (process.env.FRONTEND_URLS ?? process.env.FRONTEND_URL ??
+  (process.env.NODE_ENV === "production" ? "" : "http://localhost:3000"))
+  .split(",")
+  .map((origin) => origin.trim().replace(/\/$/, ""))
+  .filter(Boolean);
 
 const originProtection = (
   req: Request,
@@ -26,7 +27,7 @@ const originProtection = (
   }
 
   // Validate the request origin
-  if (!allowedOrigins.includes(origin)) {
+  if (!allowedOrigins.includes(origin.replace(/\/$/, ""))) {
     return res.status(403).json({
       success: false,
       message: "Request origin not allowed",

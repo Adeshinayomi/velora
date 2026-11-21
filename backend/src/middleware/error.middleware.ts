@@ -17,14 +17,34 @@ const errorHandler = (
   res: Response,
   _next: NextFunction
 ): void => {
-  console.error(err.stack);
+  const candidate = err as Error & {
+    status?: number;
+    statusCode?: number;
+    code?: number;
+    name?: string;
+  };
+  let status = candidate.statusCode ?? candidate.status ?? 500;
+  let message = candidate.message || "Internal server error";
 
-  res.status(500).json({
+  // Give clients useful request errors without exposing internal failures.
+  if (candidate.code === 11000) {
+    status = 409;
+    message = "A record with this value already exists";
+  } else if (candidate.name === "ValidationError" || candidate.name === "CastError") {
+    status = 400;
+  } else if (candidate.name === "MulterError") {
+    status = 400;
+  } else if (candidate.name === "SyntaxError" && status === 400) {
+    message = "Invalid JSON request body";
+  }
+
+  if (status >= 500) console.error(err.stack || err);
+
+  res.status(status).json({
     success: false,
-    message:
-      process.env.NODE_ENV === "production"
-        ? "Internal server error"
-        : err.message,
+    message: status >= 500 && process.env.NODE_ENV === "production"
+      ? "Internal server error"
+      : message,
   });
 };
 

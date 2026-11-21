@@ -1,9 +1,10 @@
 import "dotenv/config";
 import mongoose from "mongoose";
 import User from "../models/User.model";
-import dns from "dns";
+import configureDns from "../config/dns";
 
-dns.setServers(["8.8.8.8", "1.1.1.1"]);
+configureDns();
+
 const promoteAdmin = async (): Promise<void> => {
   try {
     const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();
