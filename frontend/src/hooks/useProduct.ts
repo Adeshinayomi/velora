@@ -19,7 +19,7 @@ export function useProducts(params: ProductQuery = {}) {
         params,
       });
 
-      console.log("PRODUCT API RESPONSE:", response);
+      // console.log("PRODUCT API RESPONSE:", response);
 
       return response.products;
     },
