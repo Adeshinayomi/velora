@@ -15,6 +15,8 @@ import orderRoutes from "./routes/order.routes";
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 // Allowed frontend origins
 const allowedOrigins = [
   "http://localhost:3000",

@@ -1,3 +1,4 @@
+
 import jwt from "jsonwebtoken";
 import { Response } from "express";
 
@@ -11,6 +12,14 @@ const getJwtSecret = (): string => {
   return secret;
 };
 
+const cookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? "none" as const : "lax" as const,
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+  path: "/",
+};
+
 export const generateToken = (userId: string): string => {
   return jwt.sign({ sub: userId }, getJwtSecret(), {
     expiresIn: "7d",
@@ -21,20 +30,14 @@ export const setAuthCookie = (
   res: Response,
   token: string
 ): void => {
-  res.cookie("velora_token", token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-    path: "/",
-  });
+  res.cookie("velora_token", token, cookieOptions);
 };
 
 export const clearAuthCookie = (res: Response): void => {
   res.clearCookie("velora_token", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
+    httpOnly: cookieOptions.httpOnly,
+    secure: cookieOptions.secure,
+    sameSite: cookieOptions.sameSite,
+    path: cookieOptions.path,
   });
 };
